@@ -11,4 +11,18 @@ use Illuminate\Notifications\Notifiable;
 class Location extends Model
 {
     use HasFactory, Notifiable;
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function film()
+    {
+        return $this->belongsTo(Film::class);
+    }
+    
+    public function upvotes()
+    {
+        return $this->hasMany(Upvote::class);
+    }
 }

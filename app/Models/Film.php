@@ -11,4 +11,9 @@ use Illuminate\Notifications\Notifiable;
 class Film extends Model
 {
     use HasFactory, Notifiable;
+    
+    public function locations()
+    {
+        return $this->hasMany(Location::class);
+    }
 }

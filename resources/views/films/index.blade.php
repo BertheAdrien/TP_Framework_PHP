@@ -15,10 +15,12 @@
                         Liste des films
                         <span class="ml-2 text-sm font-normal text-gray-400">({{ $films->count() }})</span>
                     </h3>
-                    <a href="{{ route('films.create') }}"
-                       class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition font-medium">
-                        + Ajouter un film
-                    </a>
+                    @if(auth()->user()->is_admin)
+                        <a href="{{ route('films.create') }}"
+                           class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition font-medium">
+                            + Ajouter un film
+                        </a>
+                    @endif
                 </div>
 
                 {{-- Alerts --}}
@@ -84,18 +86,20 @@
                                                    class="px-2 py-1 bg-gray-700 text-gray-200 rounded text-xs hover:bg-gray-600 transition">
                                                     Voir
                                                 </a>
-                                                <a href="{{ route('films.edit', $film) }}"
-                                                   class="px-2 py-1 bg-indigo-700 text-indigo-100 rounded text-xs hover:bg-indigo-600 transition">
-                                                    Éditer
-                                                </a>
-                                                <form action="{{ route('films.destroy', $film) }}" method="POST" class="inline"
-                                                      onsubmit="return confirm('Supprimer « {{ addslashes($film->title) }} » ?')">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button class="px-2 py-1 bg-red-800 text-red-200 rounded text-xs hover:bg-red-700 transition">
-                                                        Suppr.
-                                                    </button>
-                                                </form>
+                                                @if(auth()->user()->is_admin)
+                                                    <a href="{{ route('films.edit', $film) }}"
+                                                       class="px-2 py-1 bg-indigo-700 text-indigo-100 rounded text-xs hover:bg-indigo-600 transition">
+                                                        Éditer
+                                                    </a>
+                                                    <form action="{{ route('films.destroy', $film) }}" method="POST" class="inline"
+                                                          onsubmit="return confirm('Supprimer « {{ addslashes($film->title) }} » ?')">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button class="px-2 py-1 bg-red-800 text-red-200 rounded text-xs hover:bg-red-700 transition">
+                                                            Suppr.
+                                                        </button>
+                                                    </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -111,10 +115,12 @@
                     <div class="text-center py-16 text-gray-500">
                         <p class="text-4xl mb-4">🎬</p>
                         <p class="mb-4">Aucun film pour l'instant.</p>
-                        <a href="{{ route('films.create') }}"
-                           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
-                            Ajouter le premier film
-                        </a>
+                        @if(auth()->user()->is_admin)
+                            <a href="{{ route('films.create') }}"
+                               class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+                                Ajouter le premier film
+                            </a>
+                        @endif
                     </div>
                 @endif
 

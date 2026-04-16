@@ -1,12 +1,12 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            🎬 Gestion des Localisations
+            📍 Gestion des Localisations
         </h2>
     </x-slot>
 
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-[95vw] mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-900 shadow-sm sm:rounded-lg p-6">
 
                 {{-- Header --}}
@@ -19,26 +19,26 @@
                     </h3>
 
                     <a href="{{ route('locations.create') }}"
-                       class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition font-medium">
+                        class="px-4 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition font-medium">
                         + Ajouter une localisation
                     </a>
                 </div>
 
                 {{-- Alerts --}}
-                @if(session('success'))
+                @if (session('success'))
                     <div class="mb-4 p-3 bg-green-900/40 border border-green-700 text-green-300 rounded-lg text-sm">
                         ✓ {{ session('success') }}
                     </div>
                 @endif
 
-                @if(session('error'))
+                @if (session('error'))
                     <div class="mb-4 p-3 bg-red-900/40 border border-red-700 text-red-300 rounded-lg text-sm">
                         ✗ {{ session('error') }}
                     </div>
                 @endif
 
                 {{-- Table --}}
-                @if($locations->count() > 0)
+                @if ($locations->count() > 0)
                     <div class="overflow-x-auto rounded-lg border border-gray-700">
                         <table class="min-w-full table-fixed divide-y divide-gray-700 text-sm">
 
@@ -55,7 +55,7 @@
                             </thead>
 
                             <tbody class="divide-y divide-gray-800 bg-gray-900">
-                                @foreach($locations as $location)
+                                @foreach ($locations as $location)
                                     <tr class="hover:bg-gray-800/60 transition">
 
                                         {{-- ID --}}
@@ -83,10 +83,10 @@
                                                 {{ $location->country }}
                                             </span>
 
-                                            @if(strlen($location->country) > 60)
+                                            @if (strlen($location->country) > 60)
                                                 <button onclick="toggleSynopsis({{ $location->id }})"
-                                                        id="btn-{{ $location->id }}"
-                                                        class="text-indigo-400 hover:text-indigo-300 text-xs ml-1 underline">
+                                                    id="btn-{{ $location->id }}"
+                                                    class="text-indigo-400 hover:text-indigo-300 text-xs ml-1 underline">
                                                     Voir plus
                                                 </button>
                                             @endif
@@ -94,14 +94,49 @@
 
                                         {{-- Description --}}
                                         <td class="px-4 py-3 text-gray-300">
-                                            <div class="truncate max-w-md">
-                                                {{ $location->description }}
+                                            <div>
+                                                <span id="desc-short-{{ $location->id }}">
+                                                    {{ \Illuminate\Support\Str::limit($location->description, 80) }}
+                                                </span>
+
+                                                <span id="desc-full-{{ $location->id }}" class="hidden">
+                                                    {{ $location->description }}
+                                                </span>
+
+                                                @if (strlen($location->description) > 80)
+                                                    <button onclick="toggleDescription({{ $location->id }})"
+                                                        id="desc-btn-{{ $location->id }}"
+                                                        class="text-indigo-400 hover:text-indigo-300 text-xs ml-1 underline">
+                                                        Voir plus
+                                                    </button>
+                                                @endif
                                             </div>
                                         </td>
 
                                         {{-- Upvotes --}}
                                         <td class="px-4 py-3 text-center text-gray-300 tabular-nums">
-                                            {{ $location->upvotes_count }}
+                                            <div class="flex items-center justify-center gap-2">
+                                                <span>{{ $location->upvotes_count }}</span>
+
+                                                @php
+                                                    $hasVoted = \App\Models\Upvote::where('user_id', auth()->id())
+                                                        ->where('location_id', $location->id)
+                                                        ->exists();
+                                                @endphp
+
+                                                @if (!$hasVoted)
+                                                    <form action="{{ route('locations.upvote', $location) }}"
+                                                        method="POST">
+                                                        @csrf
+                                                        <button
+                                                            class="px-2 py-1 bg-yellow-600 text-white rounded text-xs hover:bg-yellow-500 transition">
+                                                            ▲ Upvote
+                                                        </button>
+                                                    </form>
+                                                @else
+                                                    <span class="text-xs text-gray-500 italic">Voté</span>
+                                                @endif
+                                            </div>
                                         </td>
 
                                         {{-- Actions --}}
@@ -109,26 +144,28 @@
                                             <div class="inline-flex gap-1 justify-end">
 
                                                 <a href="{{ route('locations.show', $location) }}"
-                                                   class="px-2 py-1 bg-gray-700 text-gray-200 rounded text-xs hover:bg-gray-600 transition">
+                                                    class="px-2 py-1 bg-gray-700 text-gray-200 rounded text-xs hover:bg-gray-600 transition">
                                                     Voir
                                                 </a>
 
-                                                <a href="{{ route('locations.edit', $location) }}"
-                                                   class="px-2 py-1 bg-indigo-700 text-indigo-100 rounded text-xs hover:bg-indigo-600 transition">
-                                                    Éditer
-                                                </a>
+                                                @if (auth()->user()->is_admin || auth()->id() === $location->user_id)
+                                                    <a href="{{ route('locations.edit', $location) }}"
+                                                        class="px-2 py-1 bg-indigo-700 text-indigo-100 rounded text-xs hover:bg-indigo-600 transition">
+                                                        Éditer
+                                                    </a>
 
-                                                <form action="{{ route('locations.destroy', $location) }}"
-                                                      method="POST"
-                                                      class="inline"
-                                                      onsubmit="return confirm('Supprimer « {{ addslashes($location->name) }} » ?')">
-                                                    @csrf
-                                                    @method('DELETE')
+                                                    <form action="{{ route('locations.destroy', $location) }}"
+                                                        method="POST" class="inline"
+                                                        onsubmit="return confirm('Supprimer « {{ addslashes($location->name) }} » ?')">
+                                                        @csrf
+                                                        @method('DELETE')
 
-                                                    <button class="px-2 py-1 bg-red-800 text-red-200 rounded text-xs hover:bg-red-700 transition">
-                                                        Suppr.
-                                                    </button>
-                                                </form>
+                                                        <button
+                                                            class="px-2 py-1 bg-red-800 text-red-200 rounded text-xs hover:bg-red-700 transition">
+                                                            Suppr.
+                                                        </button>
+                                                    </form>
+                                                @endif
 
                                             </div>
                                         </td>
@@ -141,14 +178,13 @@
                     <p class="mt-3 text-xs text-gray-500">
                         Total : {{ $locations->count() }} location(s)
                     </p>
-
                 @else
                     <div class="text-center py-16 text-gray-500">
                         <p class="text-4xl mb-4">🎬</p>
                         <p class="mb-4">Aucune location pour l'instant.</p>
 
                         <a href="{{ route('locations.create') }}"
-                           class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
+                            class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm">
                             Ajouter la première location
                         </a>
                     </div>
@@ -161,13 +197,25 @@
     <script>
         function toggleSynopsis(id) {
             const short = document.getElementById('short-' + id);
-            const full  = document.getElementById('full-' + id);
-            const btn   = document.getElementById('btn-' + id);
+            const full = document.getElementById('full-' + id);
+            const btn = document.getElementById('btn-' + id);
 
             const expanded = full.classList.toggle('hidden');
             short.classList.toggle('hidden');
 
             btn.textContent = expanded ? 'Voir plus' : 'Voir moins';
+        }
+
+        function toggleDescription(id) {
+            const short = document.getElementById('desc-short-' + id);
+            const full = document.getElementById('desc-full-' + id);
+            const btn = document.getElementById('desc-btn-' + id);
+
+            full.classList.toggle('hidden');
+            short.classList.toggle('hidden');
+
+            const isHidden = full.classList.contains('hidden');
+            btn.textContent = isHidden ? 'Voir plus' : 'Voir moins';
         }
     </script>
 
