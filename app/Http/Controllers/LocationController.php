@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Location;
-use App\Models\Film;
-use App\Models\User;
-use App\Models\Upvote;
 use App\Jobs\RecalculateUpvotes;
+use App\Models\Film;
+use App\Models\Location;
+use App\Models\Upvote;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Routing\Controllers\Middleware;
 use Illuminate\Routing\Controllers\HasMiddleware;
-
-
+use Illuminate\Routing\Controllers\Middleware;
+use Illuminate\Support\Facades\Auth;
 
 class LocationController extends Controller implements HasMiddleware
 {
@@ -26,6 +24,7 @@ class LocationController extends Controller implements HasMiddleware
     public function index()
     {
         $locations = Location::latest()->get();
+
         return view('locations.index', compact('locations'));
     }
 
@@ -94,22 +93,22 @@ class LocationController extends Controller implements HasMiddleware
     }
 
     public function upvote(Location $location)
-{
-    $alreadyVoted = Upvote::where('user_id', Auth::id())
-        ->where('location_id', $location->id)
-        ->exists();
+    {
+        $alreadyVoted = Upvote::where('user_id', Auth::id())
+            ->where('location_id', $location->id)
+            ->exists();
 
-    if ($alreadyVoted) {
-        return back()->with('error', 'Vous avez déjà upvoté cette localisation.');
+        if ($alreadyVoted) {
+            return back()->with('error', 'Vous avez déjà upvoté cette localisation.');
+        }
+
+        Upvote::create([
+            'user_id' => Auth::id(),
+            'location_id' => $location->id,
+        ]);
+
+        RecalculateUpvotes::dispatch($location);
+
+        return back()->with('success', 'Upvote enregistré !');
     }
-
-    Upvote::create([
-        'user_id'     => Auth::id(),
-        'location_id' => $location->id,
-    ]);
-
-    RecalculateUpvotes::dispatch($location);
-
-    return back()->with('success', 'Upvote enregistré !');
-}
 }

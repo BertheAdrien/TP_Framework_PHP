@@ -1,5 +1,7 @@
 <?php
+
 // app/Jobs/RecalculateUpvotes.php
+
 namespace App\Jobs;
 
 use App\Models\Location;

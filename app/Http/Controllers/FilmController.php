@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers;
 
 use App\Models\Film;
@@ -16,6 +17,7 @@ class FilmController extends Controller
     public function index()
     {
         $films = Film::latest()->get();
+
         return view('films.index', compact('films'));
     }
 

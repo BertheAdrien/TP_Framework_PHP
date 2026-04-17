@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Film;
 use App\Models\Location;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -18,8 +20,8 @@ class LocationFactory extends Factory
     public function definition(): array
     {
         return [
-            'film_id' => \App\Models\Film::inRandomOrder()->value('id'),
-            'user_id' => \App\Models\User::inRandomOrder()->value('id'),
+            'film_id' => Film::inRandomOrder()->value('id'),
+            'user_id' => User::inRandomOrder()->value('id'),
             'name' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph,
             'city' => $this->faker->city,
