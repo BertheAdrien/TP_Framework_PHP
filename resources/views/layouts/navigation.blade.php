@@ -44,6 +44,21 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        <div class="px-4 py-2 border-b border-gray-200 dark:border-gray-600">
+                            @if (Auth::user()->is_subscribed)
+                                <span class="text-xs px-2 py-1 bg-green-600 text-white rounded">
+                                    💳 Abonné
+                                </span>
+                            @else
+                                <span class="text-xs px-2 py-1 bg-red-600 text-white rounded">
+                                    ⚠️ Non abonné
+                                </span>
+                                <a href="/subscribe" class="block mt-1 text-xs text-indigo-400 hover:underline">
+                                    S'abonner
+                                </a>
+                            @endif
+                        </div>
+
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
@@ -89,6 +104,22 @@
                 <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
             </div>
 
+            <div class="px-4 py-2">
+                @if (Auth::user()->is_subscribed)
+                    <span class="text-xs px-2 py-1 bg-green-600 text-white rounded">
+                        💳 Abonné
+                    </span>
+                @else
+                    <span class="text-xs px-2 py-1 bg-red-600 text-white rounded">
+                        ⚠️ Non abonné
+                    </span>
+                    <div class="mt-2">
+                        <a href="/subscribe" class="text-xs text-indigo-400 hover:underline">
+                            S'abonner
+                        </a>
+                    </div>
+                @endif
+            </div>
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile.edit')">
                     {{ __('Profile') }}
