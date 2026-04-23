@@ -4,6 +4,9 @@ use App\Http\Controllers\FilmController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Socialite\Facades\Socialite;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 Route::get('/', function () {
     return view('welcome');
@@ -12,6 +15,35 @@ Route::get('/', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/auth/github', function () {
+    return Socialite::driver('github')->redirect();
+})->name('github.login');
+
+Route::get('/auth/github/callback', function () {
+    $githubUser = app('Laravel\Socialite\Contracts\Factory')
+    ->driver('github')
+    ->stateless()
+    ->user();
+
+    $email = $githubUser->getEmail() ?? $githubUser->getId().'@github.com';
+
+    $user = User::updateOrCreate(
+        ['email' => $email],
+        [
+            'name' => $githubUser->getName() ?? $githubUser->getNickname(),
+            'password' => bcrypt(str()->random(16)),
+        ]
+    );
+
+    Auth::login($user);
+
+    return redirect('/dashboard');
+});
+
+Route::get('/test-cert', function () {
+    dd(file_exists('C:/xampp/php/extras/ssl/cacert.pem'));
+});
 
 Route::middleware('auth')->group(function () {
 
